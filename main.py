@@ -8,6 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 import math
+import qrgen
 #TODO: Add to the top of the first page Serial number list with the total number of pages and barcodes
 #TODO: Make a QR code that gives a list of all devices
 #TODO: First row in spreadsheet has title and going down is all the serial numbers and the title has to be put on the first page and on the header for all subsequent pages pages
@@ -30,11 +31,11 @@ pdf_canvas.setLineWidth(.3)
 pdf_canvas.setFont('Helvetica', 8)
 
 # Define the starting coordinates for the barcode and text
-x, y = 5 * mm, 280 * mm
+x, y = 3.75 * mm, 280 * mm
 
 # Initialize variables to keep track of the total barcode count and the current page number
 barcode_count = 1
-current_pages = 0
+current_pages = 1
 # Loop through each row and column
 count = 0
 for row in worksheet.iter_rows():
@@ -73,24 +74,24 @@ for row in worksheet.iter_rows(values_only=True):
     # Move to the next barcode position
     x += barcode_width + horizontal_spacing
     if x > 180 * mm:
-        x = 5 * mm
+        x = 3.75 * mm
         y -= barcode_height + vertical_spacing
         
         # If we're at the bottom of the page, start a new page and add the total barcode count to the footer
         if y < 20 * mm:
-            pdf_canvas.drawString(150*mm, 10*mm, f"Page {total_pages+1} of {total_pages+1}")
+            pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages} of {total_pages}")
             pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
             barcode_count = 0
-            total_pages += 1
+            current_pages += 1
             pdf_canvas.showPage()
-            x, y = 5 * mm, 280 * mm
+            x, y = 3.75 * mm, 280 * mm
             pdf_canvas.setFont('Helvetica', 8)
     
     # Increment the barcode count for each barcode generated
     barcode_count += 1
 
 # Add the total number of barcodes to the last page footer
-pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages+1} of {total_pages+1}")
+pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages} of {total_pages}")
 pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
 pdf_canvas.save()
-#FIXME: Page of total pages is not correct
+
