@@ -20,8 +20,9 @@ for row in ws.iter_rows():
 
 # Encode the values as a QR code
 qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
-qr.add_data(','.join(values))
+qr.add_data('\r'.join(values))
 qr.make(fit=True)
+
 
 # Save the QR code image
 img = qr.make_image(fill_color='black', back_color='white')
