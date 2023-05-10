@@ -8,9 +8,10 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 import math
 from qrgen import codegen
+from pathlib import Path
+from datetime import datetime
 #TODO: Add to the top of the first page Serial number list with the total number of pages and barcodes
 #TODO: First row in spreadsheet has title and going down is all the serial numbers and the title has to be put on the first page and on the header for all subsequent pages pages
-#TODO: Every colum creates its own pdf
 #TODO: Small sealed label that says box number and sealded and do not unseal
 
 
@@ -30,7 +31,14 @@ for column in worksheet.columns:
     # Set up the PDF canvas with A4 size
     name = column[0].value
     if name is not None:
-        pdf_canvas = canvas.Canvas(f'{name}.pdf', pagesize=A4)
+        #Setting location of the file
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+        datetoday = datetime.today().strftime('%Y-%m-%d')
+        pathtosave = f"{desktop}/sealed/sealed_{datetoday}/seal_{name}"
+        Path(pathtosave).mkdir(parents=True, exist_ok=True)
+        file_path = f"{pathtosave}/{name}.pdf"
+        
+        pdf_canvas = canvas.Canvas(file_path, pagesize=A4)
         pdf_canvas.setLineWidth(.3)
         pdf_canvas.setFont('Helvetica', 8)
 
@@ -86,7 +94,7 @@ for column in worksheet.columns:
                     
                     # If we're at the bottom of the page, start a new page and add the total barcode count to the footer
                     if y < 20 * mm:
-                        codegen(values)
+                        codegen(values, name, current_pages)
                         pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages} of {total_pages}")
                         pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
                         barcode_count = 0
@@ -102,6 +110,6 @@ for column in worksheet.columns:
         # Add the total number of barcodes to the last page footer
         pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages} of {total_pages}")
         pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
-        codegen(values)
+        codegen(values, name, current_pages)
         pdf_canvas.save()
 
