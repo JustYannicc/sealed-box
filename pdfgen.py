@@ -102,3 +102,7 @@ def pdfgen(name, column):
     pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
     codegen(values, name, current_pages)
     pdf_canvas.save()
+    
+
+ def firstpage():
+     
