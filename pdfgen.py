@@ -37,13 +37,13 @@ def pdfgen(name, column):
 
     # Initialize variables to keep track of the total barcode count and the current page number
     barcode_count = 1
-    current_pages = 1
+    current_pages = 2
     # Loop through each row and column
     count = 0
     for cell in column[1:]:
         if cell.value is not None:
             count += 1
-    total_pages = math.ceil(count/100)
+    total_pages = math.ceil(count/100) + 1
     values = []
     
     # Loop through each row in the column and generate a barcode for the cell data
@@ -85,7 +85,7 @@ def pdfgen(name, column):
                 # If we're at the bottom of the page, start a new page and add the total barcode count to the footer
                 if y < 20 * mm:
                     codegen(values, name, current_pages)
-                    pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages} of {total_pages}")
+                    pdf_canvas.drawString(180*mm, 10*mm, f"Page {current_pages} of {total_pages}")
                     pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
                     barcode_count = 0
                     current_pages += 1
@@ -98,11 +98,53 @@ def pdfgen(name, column):
             barcode_count += 1
     
     # Add the total number of barcodes to the last page footer
-    pdf_canvas.drawString(150*mm, 10*mm, f"Page {current_pages} of {total_pages}")
+    barcode_count -= 1
+    pdf_canvas.drawString(180*mm, 10*mm, f"Page {current_pages} of {total_pages}")
     pdf_canvas.drawString(10*mm, 10*mm, f"Total Barcodes: {barcode_count}")
     codegen(values, name, current_pages)
     pdf_canvas.save()
+    firstpage(name, total_pages, pathtosave)
     
+def firstpage(name, numbertotalpages, output_path):
+    filepath = f"{output_path}/test.pdf"
+    # Initialize the PDF canvas
+    c = canvas.Canvas(filepath, pagesize=A4)
 
- def firstpage():
-     
+    # Set the font size and style for the title
+    c.setFont("Helvetica-Bold", 40)
+
+    # Calculate the center position of the page
+    page_width, page_height = A4
+    title_width = c.stringWidth(f"Sealed: {name} - Date", "Helvetica-Bold", 40)
+    title_x = (page_width - title_width) / 2
+    title_y = page_height - 50  # Distance from the top of the page
+
+    # Draw the title on the page
+    c.drawString(title_x, title_y, f"Sealed: {name} - Date")
+
+    # Set the font size and style for the additional information
+    c.setFont("Helvetica", 20)
+
+    # Calculate the position for the barcode count and page count
+    count_x = title_x
+    count_y = title_y - 50  # Distance below the title
+
+    # Draw the total amount of barcodes
+    c.drawString(count_x, count_y, "Total amount of barcodes: 1")
+
+    # Draw the total number of pages
+    page_count_y = count_y - 30  # Distance below the barcode count
+    c.drawString(count_x, page_count_y, f"Total number of pages: {numbertotalpages}")
+    
+    c.setFont('Helvetica', 8)
+    
+    #Footer
+    c.drawString(180*mm, 10*mm, f"Page 1 of {numbertotalpages}")
+    c.drawString(10*mm, 10*mm, f"Total Barcodes: 1")
+
+    # Save the canvas as a PDF file
+    c.save()
+    #TODO: Barcode count needs to be fixed
+    #TODO: Add the QR codes with the page number on top
+    #TODO: Merge PDFs into one
+    #TODO: Fix formating
